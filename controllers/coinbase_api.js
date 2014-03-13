@@ -17,12 +17,21 @@ exports.getExchangeRates = function(params, cb) {
   });
 };
 
-// TODO: Figure this out.
 exports.sendMoney = function(params, cb) {
   var accessToken = getCoinbaseAccessToken(params.user);
   if (!accessToken) {
     cb(new Error('No Coinbase access token provided.'));
   }
+  var options = {
+    url: BASE_URI + "/transactions/send_money",
+    qs: {
+      access_token: accessToken
+    },
+    transaction: params.transaction
+  };
+  request.post(options, function (error, response, result) {
+    cb(error, result);
+  });
 };
 
 // TODO: Figure this out.

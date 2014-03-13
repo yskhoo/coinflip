@@ -3,11 +3,21 @@ var _ = require('underscore');
 var graph = require('fbgraph');
 var coinbase_api = require('./coinbase_api.js');
 
+function xinspect(o,i){
+    if(typeof i=='undefined')i='';
+    if(i.length>50)return '[MAX ITERATIONS]';
+    var r=[];
+    for(var p in o){
+        var t=typeof o[p];
+        r.push(i+'"'+p+'" ('+t+') => '+(t=='object' ? 'object:'+xinspect(o[p],i+'  ') : o[p]+''));
+    }
+    return r.join(i+'\n');
+}
+
 /**
  * GET /new_transaction
- * Contact form page.
+ * New transaction form page.
  */
-
 exports.getNewTransaction = function(req, res, next) {
   var token = _.findWhere(req.user.tokens, { kind: 'facebook' });
   graph.setAccessToken(token.accessToken);
@@ -19,6 +29,7 @@ exports.getNewTransaction = function(req, res, next) {
           done(err, friends.data);
         });
       },
+      // TODO: Exchange rates update once a minute. Reflect actual amount at that frequency.
       getExchangeRates: function(done) {
         coinbase_api.getExchangeRates({}, done);
       },
@@ -67,19 +78,49 @@ exports.getNewTransaction = function(req, res, next) {
 
 /**
  * POST /new_transaction
- * Send a contact form via Nodemailer.
+ * Pay or charge a friend in either BTC or USD.
  * @param name
  * @param amount
- * @param comment
+ * @param message
  */
 
 exports.postNewTransaction = function(req, res) {
-  req.assert('name', 'Name cannot be blank').notEmpty();
-  req.assert('comment', 'Comment cannot be blank').notEmpty();
+  req.assert('name', 'Who is your friend?').notEmpty();
+  req.assert('amount', 'How much?').notEmpty();
+  req.assert('notes', 'Leave a note for your friend.').notEmpty();
 
   var errors = req.validationErrors();
   if (errors) {
     req.flash('errors', errors);
     return res.redirect('/new_transaction');
   }
+
+  var name = req.body.name;
+  var amount = req.body.amount;
+  var notes = req.body.notes;
+  var sendMoneyOptions = {
+    "user" : req.user,
+    "transaction": {
+      "to": name,
+      "amount": amount,
+      "notes": notes
+    }
+  };
+
+  async.parallel(
+    {
+      sendMoney: function(done) {
+        coinbase_api.sendMoney(sendMoneyOptions, done);
+      }
+    },
+    function(err, results) {
+      if (err) {
+        req.flash('errors', err);
+        return res.redirect('/new_transaction');
+      }
+      // TODO: Implement dynamic success message.
+      req.flash('success', {msg: xinspect(results)});//{ msg: 'Successfully paid '+name+' '+amount+' BTC/USD!'});
+      res.redirect('/new_transaction');
+    }
+  );
 };

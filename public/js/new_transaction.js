@@ -11,8 +11,8 @@ cf.apps.new_transaction = function() {
 };
 
 cf.apps.new_transaction.prototype.initializeForm = function() {
-  var $transactionRecipient = $('.transactionRecipient');
-  if ($transactionRecipient.length) {
+  var $typeahead = $('.typeahead');
+  if ($typeahead.length) {
     var names = new Bloodhound({
       datumTokenizer: function(d) {
         return Bloodhound.tokenizers.whitespace(d.name);
@@ -23,7 +23,7 @@ cf.apps.new_transaction.prototype.initializeForm = function() {
 
     names.initialize();
 
-    $transactionRecipient.typeahead(null, {
+    $typeahead.typeahead(null, {
       displayKey: 'name',
       source: names.ttAdapter()
     });

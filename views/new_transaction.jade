@@ -15,7 +15,7 @@ block content
         i.fa.fa-user
       .col-xs-8
         .example-numbers
-          input.form-control.transactionRecipient(class='typeahead', type='text', autofocus=true, autocomplete='off', spellcheck='false', dir='auto')
+          input.form-control.typeahead(type='text', name='name', autofocus=true, autocomplete='off', spellcheck='false', dir='auto')
     .form-group
       label.currencyLabel(class='col-xs-2 control-label', for='amount')
         i.fa.fa-btc
@@ -29,10 +29,10 @@ block content
             i.fa.fa-usd
         input.form-control.amount(type='text', name='amount')
     .form-group
-      label(class='col-xs-2 control-label', for='message')
+      label(class='col-xs-2 control-label', for='notes')
         i.fa.fa-comment
       .col-xs-8
-        textarea.form-control(type='text', name='message', id='message', rows='7')
+        textarea.form-control(type='text', name='notes', id='notes', rows='7')
     .form-group
       .col-xs-offset-2.col-xs-2
         button.btn.btn-pay(type='submit')
