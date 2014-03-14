@@ -23,14 +23,19 @@ exports.sendMoney = function(params, cb) {
     cb(new Error('No Coinbase access token provided.'));
   }
   var options = {
+    headers: {'content-type' : 'application/x-www-form-urlencoded'},
     url: BASE_URI + "/transactions/send_money",
     qs: {
       access_token: accessToken
     },
-    transaction: params.transaction
+    // json: {transaction: params.transaction}
+    body: JSON.stringify({transaction: params.transaction})
   };
-  request.post(options, function (error, response, result) {
-    cb(error, result);
+  //request.post(BASE_URI + "/transactions/send_money").form({transaction:params.transaction});
+  request.post(options, function (error, response, body) {
+    console.log(error);
+    console.log(body);
+    cb(error, body);
   });
 };
 
